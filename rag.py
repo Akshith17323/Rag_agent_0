@@ -98,7 +98,7 @@ def build_vectorstore(documents: list[Document]):
         print("Warning: GOOGLE_API_KEY not found in environment variables.")
         
     # Note: Ensure the model specified is correct and supported in your region
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
     
     # 3. Store in Chroma (in-memory, no persist_directory)
     try:
