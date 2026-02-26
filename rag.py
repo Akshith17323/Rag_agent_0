@@ -1,6 +1,5 @@
 import os
 import tempfile
-from dotenv import load_dotenv
 
 # LangChain imports
 from langchain_core.documents import Document
@@ -8,9 +7,6 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import Chroma
-
-# Load environment variables (e.g., GOOGLE_API_KEY)
-load_dotenv()
 
 def load_documents(file_bytes_list: list, file_names: list) -> list[Document]:
     """
@@ -93,7 +89,7 @@ def build_vectorstore(documents: list[Document]):
 
     # 2. Create embeddings using Google Gemini
     # Requires GOOGLE_API_KEY in environment
-    api_key = os.getenv("GOOGLE_API_KEY")
+    api_key = os.environ.get("GOOGLE_API_KEY")
     if not api_key:
         print("Warning: GOOGLE_API_KEY not found in environment variables.")
         

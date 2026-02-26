@@ -1,9 +1,5 @@
 import os
 import requests
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
 
 def search_web(query: str) -> list[dict]:
     """
@@ -16,7 +12,7 @@ def search_web(query: str) -> list[dict]:
         list[dict]: A list of up to 5 result dictionaries containing 'title', 'snippet', and 'link'.
                     Returns an empty list on any error.
     """
-    api_key = os.getenv("SERPER_API_KEY")
+    api_key = os.environ.get("SERPER_API_KEY")
     if not api_key:
         print("Error: SERPER_API_KEY not found in environment.")
         return []

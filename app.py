@@ -1,6 +1,16 @@
-import streamlit as st
 import os
-from dotenv import load_dotenv
+try:
+    import streamlit as st
+    GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
+    SERPER_API_KEY = st.secrets["SERPER_API_KEY"]
+except:
+    from dotenv import load_dotenv
+    load_dotenv()
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+    SERPER_API_KEY = os.getenv("SERPER_API_KEY")
+
+os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY or ""
+os.environ["SERPER_API_KEY"] = SERPER_API_KEY or ""
 
 # Import components from our other modules
 from rag import load_documents, build_vectorstore, retrieve_context
@@ -10,20 +20,6 @@ from web_search import search_web, format_search_results
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-
-# Try to load local .env if available
-load_dotenv()
-
-# --- Utility Functions ---
-def get_api_key(key_name: str) -> str:
-    """Safely fetch API keys: prioritize st.secrets (deployed), then os.getenv (local)."""
-    try:
-        if key_name in st.secrets:
-            return st.secrets[key_name]
-    except Exception:
-        pass
-    return os.getenv(key_name, "")
-
 
 def init_session_state():
     """Initialize essential Streamlit session state variables."""
@@ -38,12 +34,8 @@ st.set_page_config(page_title="RAG + Web Search Agent", page_icon="🕵️", lay
 
 init_session_state()
 
-# Fetch keys
-google_key = get_api_key("GOOGLE_API_KEY")
-serper_key = get_api_key("SERPER_API_KEY")
-
-st.session_state["api_key_status"]["google"] = bool(google_key)
-st.session_state["api_key_status"]["serper"] = bool(serper_key)
+st.session_state["api_key_status"]["google"] = bool(GOOGLE_API_KEY)
+st.session_state["api_key_status"]["serper"] = bool(SERPER_API_KEY)
 
 
 # ==========================================
@@ -88,10 +80,6 @@ with st.sidebar:
                     # Build RAG system
                     docs = load_documents(file_bytes_list, file_names)
                     if docs:
-                        # Set GOOGLE_API_KEY in environment explicitly so langchain_google_genai finds it 
-                        if google_key and not os.getenv("GOOGLE_API_KEY"):
-                             os.environ["GOOGLE_API_KEY"] = google_key
-                             
                         vstore = build_vectorstore(docs)
                         if vstore:
                              st.session_state["vectorstore"] = vstore
@@ -146,10 +134,6 @@ if st.button("Get Answer", type="primary"):
             web_results = []
             web_context = ""
             if enable_web_search and st.session_state["api_key_status"]["serper"]:
-                # Ensure Serper key is in env for web_search.py
-                if serper_key and not os.getenv("SERPER_API_KEY"):
-                     os.environ["SERPER_API_KEY"] = serper_key
-
                 web_results = search_web(question)
                 web_context = format_search_results(web_results)
             elif enable_web_search and not st.session_state["api_key_status"]["serper"]:
@@ -170,10 +154,6 @@ Question: {question}
 Provide a clear, accurate, and consolidated answer based ONLY on the context provided above.
 """
             prompt = PromptTemplate.from_template(prompt_template)
-            
-            # Ensure Google key is in OS env for ChatGoogleGenerativeAI
-            if google_key and not os.getenv("GOOGLE_API_KEY"):
-                 os.environ["GOOGLE_API_KEY"] = google_key
 
             # 4. Generate Answer with Gemini
             llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash-lite", temperature=0.3)
