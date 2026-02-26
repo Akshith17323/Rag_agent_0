@@ -1,0 +1,9 @@
+streamlit              # web UI framework
+langchain              # RAG pipeline orchestration
+langchain-google-genai # Google Gemini integration for LangChain
+langchain-community    # community loaders and tools
+chromadb               # in-memory vector database for RAG
+pypdf                  # load PDF files
+sentence-transformers  # free local embeddings (all-MiniLM-L6-v2)
+requests               # HTTP calls to Serper API
+python-dotenv          # load .env file locally
